@@ -1,6 +1,6 @@
 # my-dashboard
 
-FastForward Logistics is a mid-size freight and supply chain company. Their ops team is drowning in spreadsheets. THis dashboard is for the VP of Operations to see how the business is running: shipment volume, on-time delivery rates, regional performance, and open exceptions.
+FastForward Logistics is a mid-size freight and supply chain company. Their ops team is drowning in spreadsheets. This dashboard is for the VP of Operations to see how the business is running: shipment volume, on-time delivery rates, regional performance, and open exceptions. It uses the FastForward Logistrics Branding including the logo, fonts, and colors.
 
 ## Recommended IDE Setup
 

@@ -5,3 +5,7 @@
   padding: 0;
 }
 
+body, .v-application {
+  font-family: 'Segoe UI', Arial, sans-serif !important;
+}
+

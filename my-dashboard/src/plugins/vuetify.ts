@@ -11,6 +11,11 @@ const vuetify = createVuetify({
   theme: {
     defaultTheme: 'dark',
   },
+  defaults: {
+    global: {
+      style: { fontFamily: "'Segoe UI', Arial, sans-serif" },
+    },
+  },
   icons: {
     defaultSet: 'mdi',
   },
