@@ -2,6 +2,9 @@
 import { ref, computed, nextTick } from 'vue'
 import { Bar, Line } from 'vue-chartjs'
 import logoUrl from '@/assets/ff-logistics-logo.svg'
+import * as XLSX from 'xlsx'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -270,6 +273,49 @@ const expandedTableItems = computed(() => {
 function formatNumber(n: number) {
   return n.toLocaleString()
 }
+
+// --- Export ---
+function getExportRows() {
+  return filteredData.value.map((d) => ({
+    Month: d.month,
+    Year: d.year,
+    'Shipment Volume': d.shipmentVolume,
+    'On-Time Delivery Rate (%)': d.onTimeDeliveryRate,
+    'Regional Performance (%)': d.regionalPerformance,
+    'Open Exceptions': d.openExceptions,
+  }))
+}
+
+function downloadExcel() {
+  const rows = getExportRows()
+  const ws = XLSX.utils.json_to_sheet(rows)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Metrics')
+  XLSX.writeFile(wb, `FastForward_Logistics_${selectedMonth.value}.xlsx`)
+}
+
+function downloadPdf() {
+  const rows = getExportRows()
+  const doc = new jsPDF({ orientation: 'landscape' })
+  doc.setFontSize(16)
+  doc.text('FastForward Logistics — Dashboard Report', 14, 18)
+  doc.setFontSize(10)
+  doc.text(`Period: ${selectedMonth.value === 'All' ? 'Full Year 2025' : selectedMonth.value + ' 2025'}`, 14, 26)
+
+  const columns = Object.keys(rows[0] || {})
+  const body = rows.map((r) => columns.map((c) => String((r as any)[c])))
+
+  autoTable(doc, {
+    startY: 32,
+    head: [columns],
+    body,
+    theme: 'grid',
+    headStyles: { fillColor: [6, 232, 181], textColor: [8, 28, 59], fontStyle: 'bold' },
+    styles: { fontSize: 9 },
+  })
+
+  doc.save(`FastForward_Logistics_${selectedMonth.value}.pdf`)
+}
 </script>
 
 <template>
@@ -279,6 +325,29 @@ function formatNumber(n: number) {
       <img :src="logoUrl" alt="FastForward Logistics" style="height: 36px; vertical-align: middle" />
     </v-app-bar-title>
     <template #append>
+      <v-btn
+        icon
+        variant="text"
+        size="small"
+        color="#06e8b5"
+        @click="downloadExcel"
+        aria-label="Download Excel"
+      >
+        <v-icon>mdi-file-excel-outline</v-icon>
+        <v-tooltip activator="parent" location="bottom">Download Excel</v-tooltip>
+      </v-btn>
+      <v-btn
+        icon
+        variant="text"
+        size="small"
+        color="#06e8b5"
+        class="mr-2"
+        @click="downloadPdf"
+        aria-label="Download PDF"
+      >
+        <v-icon>mdi-file-pdf-box</v-icon>
+        <v-tooltip activator="parent" location="bottom">Download PDF</v-tooltip>
+      </v-btn>
       <div style="width: 200px" class="mr-2">
         <v-select
           v-model="selectedMonth"
