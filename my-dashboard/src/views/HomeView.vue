@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { Bar, Line } from 'vue-chartjs'
 import logoUrl from '@/assets/ff-logistics-logo.svg'
 import {
@@ -227,6 +227,45 @@ const areaOptions = {
   scales: baseScales,
 }
 
+// --- Expand / collapse ---
+type ChartId = 'shipments' | 'onTime' | 'exceptions'
+const expandedChart = ref<ChartId | null>(null)
+const expandKey = ref(0) // force re-render on expand/collapse
+
+function expandChart(id: ChartId) {
+  expandedChart.value = id
+  expandKey.value++
+}
+function collapseChart() {
+  expandedChart.value = null
+  expandKey.value++
+}
+
+const chartTitles: Record<ChartId, string> = {
+  shipments: 'Monthly Shipment Volume',
+  onTime: 'On-Time Delivery Rate',
+  exceptions: 'Open Exceptions Trend',
+}
+
+// --- Data table for expanded view ---
+const expandedTableHeaders = computed(() => {
+  const id = expandedChart.value
+  if (!id) return []
+  const fieldMap: Record<ChartId, { text: string; value: string }> = {
+    shipments: { text: 'Shipment Volume', value: 'shipmentVolume' },
+    onTime: { text: 'On-Time Rate (%)', value: 'onTimeDeliveryRate' },
+    exceptions: { text: 'Open Exceptions', value: 'openExceptions' },
+  }
+  return [
+    { title: 'Month', key: 'month', align: 'start' as const },
+    { title: fieldMap[id].text, key: fieldMap[id].value, align: 'end' as const },
+  ]
+})
+
+const expandedTableItems = computed(() => {
+  return filteredData.value.map((d) => ({ ...d }))
+})
+
 // --- Helpers ---
 function formatNumber(n: number) {
   return n.toLocaleString()
@@ -254,95 +293,180 @@ function formatNumber(n: number) {
   </v-app-bar>
 
   <v-main>
-    <v-container fluid class="dashboard-container">
-      <!-- Summary Cards -->
-      <div class="card-grid">
-        <!-- Shipment Volume -->
-        <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Shipment Volume</div>
-          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryShipments) }}</div>
-          <div
-            class="text-caption mt-2"
-            :class="shipmentsChange.direction === 'up' ? 'text-success' : 'text-error'"
+    <!-- =========== EXPANDED CHART VIEW =========== -->
+    <transition name="page-fade">
+      <v-container v-if="expandedChart" key="expanded" fluid class="expanded-container">
+        <div class="expanded-header">
+          <h2 class="text-h5 font-weight-bold">{{ chartTitles[expandedChart] }}</h2>
+          <v-btn
+            icon
+            variant="text"
+            size="small"
+            @click="collapseChart"
+            aria-label="Back to dashboard"
           >
-            <v-icon size="x-small">
-              {{ shipmentsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-            {{ shipmentsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
-          </div>
-        </v-card>
-
-        <!-- On-Time Delivery Rate -->
-        <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">On-Time Delivery</div>
-          <div class="text-h5 font-weight-bold">{{ summaryOnTime }}%</div>
-          <div
-            class="text-caption mt-2"
-            :class="onTimeChange.direction === 'up' ? 'text-success' : 'text-error'"
-          >
-            <v-icon size="x-small">
-              {{ onTimeChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-            {{ onTimeChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
-          </div>
-        </v-card>
-
-        <!-- Regional Performance -->
-        <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Regional Performance</div>
-          <div class="text-h5 font-weight-bold">{{ summaryRegional }}%</div>
-          <div
-            class="text-caption mt-2"
-            :class="regionalChange.direction === 'up' ? 'text-success' : 'text-error'"
-          >
-            <v-icon size="x-small">
-              {{ regionalChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-            {{ regionalChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
-          </div>
-        </v-card>
-
-        <!-- Open Exceptions (lower is better) -->
-        <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Open Exceptions</div>
-          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryExceptions) }}</div>
-          <div
-            class="text-caption mt-2"
-            :class="exceptionsChange.direction === 'down' ? 'text-success' : 'text-error'"
-          >
-            <v-icon size="x-small">
-              {{ exceptionsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-            </v-icon>
-            {{ exceptionsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
-          </div>
-        </v-card>
-      </div>
-
-      <!-- Charts Row: Shipment Volume Bar + On-Time Delivery Line -->
-      <div class="chart-grid-2 chart-row-flex">
-        <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
-          <div class="chart-inner">
-            <Bar :data="shipmentChartData" :options="barOptions as any" />
-          </div>
-        </v-card>
-        <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
-          <div class="chart-inner">
-            <Line :data="onTimeChartData" :options="lineOptions as any" />
-          </div>
-        </v-card>
-      </div>
-
-      <!-- Full-width Open Exceptions Area Chart -->
-      <v-card variant="tonal" rounded="lg" class="pa-10 chart-card conversions-card">
-        <div class="chart-inner">
-          <Line :data="exceptionsChartData" :options="areaOptions as any" />
+            <v-icon>mdi-arrow-collapse</v-icon>
+            <v-tooltip activator="parent" location="bottom">Back to dashboard</v-tooltip>
+          </v-btn>
         </div>
-      </v-card>
-    </v-container>
+
+        <v-card variant="tonal" rounded="lg" class="expanded-chart-card">
+          <div class="expanded-chart-inner">
+            <Bar v-if="expandedChart === 'shipments'" :key="expandKey" :data="shipmentChartData" :options="barOptions as any" />
+            <Line v-else-if="expandedChart === 'onTime'" :key="expandKey" :data="onTimeChartData" :options="lineOptions as any" />
+            <Line v-else-if="expandedChart === 'exceptions'" :key="expandKey" :data="exceptionsChartData" :options="areaOptions as any" />
+          </div>
+        </v-card>
+
+        <v-card variant="tonal" rounded="lg" class="mt-6 expanded-table-card">
+          <v-data-table
+            :headers="expandedTableHeaders as any"
+            :items="expandedTableItems"
+            density="compact"
+            items-per-page="-1"
+            class="bg-transparent"
+            hide-default-footer
+          />
+        </v-card>
+      </v-container>
+    </transition>
+
+    <!-- =========== DASHBOARD VIEW =========== -->
+    <transition name="page-fade">
+      <v-container v-if="!expandedChart" key="dashboard" fluid class="dashboard-container">
+        <!-- Summary Cards -->
+        <div class="card-grid">
+          <v-card variant="tonal" class="pa-10" rounded="lg">
+            <div class="text-caption text-medium-emphasis mb-2">Shipment Volume</div>
+            <div class="text-h5 font-weight-bold">{{ formatNumber(summaryShipments) }}</div>
+            <div
+              class="text-caption mt-2"
+              :class="shipmentsChange.direction === 'up' ? 'text-success' : 'text-error'"
+            >
+              <v-icon size="x-small">
+                {{ shipmentsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              </v-icon>
+              {{ shipmentsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            </div>
+          </v-card>
+
+          <v-card variant="tonal" class="pa-10" rounded="lg">
+            <div class="text-caption text-medium-emphasis mb-2">On-Time Delivery</div>
+            <div class="text-h5 font-weight-bold">{{ summaryOnTime }}%</div>
+            <div
+              class="text-caption mt-2"
+              :class="onTimeChange.direction === 'up' ? 'text-success' : 'text-error'"
+            >
+              <v-icon size="x-small">
+                {{ onTimeChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              </v-icon>
+              {{ onTimeChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            </div>
+          </v-card>
+
+          <v-card variant="tonal" class="pa-10" rounded="lg">
+            <div class="text-caption text-medium-emphasis mb-2">Regional Performance</div>
+            <div class="text-h5 font-weight-bold">{{ summaryRegional }}%</div>
+            <div
+              class="text-caption mt-2"
+              :class="regionalChange.direction === 'up' ? 'text-success' : 'text-error'"
+            >
+              <v-icon size="x-small">
+                {{ regionalChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              </v-icon>
+              {{ regionalChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            </div>
+          </v-card>
+
+          <v-card variant="tonal" class="pa-10" rounded="lg">
+            <div class="text-caption text-medium-emphasis mb-2">Open Exceptions</div>
+            <div class="text-h5 font-weight-bold">{{ formatNumber(summaryExceptions) }}</div>
+            <div
+              class="text-caption mt-2"
+              :class="exceptionsChange.direction === 'down' ? 'text-success' : 'text-error'"
+            >
+              <v-icon size="x-small">
+                {{ exceptionsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              </v-icon>
+              {{ exceptionsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            </div>
+          </v-card>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="chart-grid-2 chart-row-flex">
+          <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
+            <v-btn
+              icon
+              variant="text"
+              size="x-small"
+              class="expand-btn"
+              @click="expandChart('shipments')"
+              aria-label="Expand chart"
+            >
+              <v-icon size="small">mdi-arrow-expand</v-icon>
+              <v-tooltip activator="parent" location="bottom">Expand</v-tooltip>
+            </v-btn>
+            <div class="chart-inner">
+              <Bar :data="shipmentChartData" :options="barOptions as any" />
+            </div>
+          </v-card>
+          <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
+            <v-btn
+              icon
+              variant="text"
+              size="x-small"
+              class="expand-btn"
+              @click="expandChart('onTime')"
+              aria-label="Expand chart"
+            >
+              <v-icon size="small">mdi-arrow-expand</v-icon>
+              <v-tooltip activator="parent" location="bottom">Expand</v-tooltip>
+            </v-btn>
+            <div class="chart-inner">
+              <Line :data="onTimeChartData" :options="lineOptions as any" />
+            </div>
+          </v-card>
+        </div>
+
+        <!-- Full-width Exceptions Area Chart -->
+        <v-card variant="tonal" rounded="lg" class="pa-10 chart-card conversions-card">
+          <v-btn
+            icon
+            variant="text"
+            size="x-small"
+            class="expand-btn"
+            @click="expandChart('exceptions')"
+            aria-label="Expand chart"
+          >
+            <v-icon size="small">mdi-arrow-expand</v-icon>
+            <v-tooltip activator="parent" location="bottom">Expand</v-tooltip>
+          </v-btn>
+          <div class="chart-inner">
+            <Line :data="exceptionsChartData" :options="areaOptions as any" />
+          </div>
+        </v-card>
+      </v-container>
+    </transition>
   </v-main>
 </template>
 
 <style scoped>
+/* ===== Page transition ===== */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.97);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* ===== Dashboard view ===== */
 .dashboard-container {
   display: flex;
   flex-direction: column;
@@ -375,6 +499,7 @@ function formatNumber(n: number) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .chart-card :deep(.v-card__content) {
@@ -397,7 +522,6 @@ function formatNumber(n: number) {
   height: 100% !important;
 }
 
-/* Conversions card at bottom */
 .conversions-card {
   flex: 2;
   min-height: 150px;
@@ -411,6 +535,81 @@ function formatNumber(n: number) {
   min-height: 200px;
 }
 
+/* ===== Expand button ===== */
+.expand-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.chart-card:hover .expand-btn {
+  opacity: 1;
+}
+
+/* ===== Expanded view ===== */
+.expanded-container {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+}
+
+.expanded-container :deep(.v-card) {
+  padding: 8px !important;
+}
+
+.expanded-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.expanded-chart-card {
+  height: 50vh;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.expanded-chart-inner {
+  flex: 1;
+  position: relative;
+  padding: 16px;
+}
+
+.expanded-chart-inner canvas {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: calc(100% - 32px) !important;
+  height: calc(100% - 32px) !important;
+}
+
+.expanded-table-card {
+  flex: 1;
+}
+
+.expanded-table-card :deep(.v-table) {
+  background: transparent !important;
+}
+
+.expanded-table-card :deep(th) {
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.expanded-table-card :deep(td) {
+  border-bottom-color: rgba(255,255,255,0.06) !important;
+}
+
+/* ===== Misc ===== */
 .v-app-bar :deep(.v-field__input) {
   padding-left: 12px;
 }
