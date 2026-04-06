@@ -1,6 +1,6 @@
 # my-dashboard
 
-This template should help get you started developing with Vue 3 in Vite.
+FastForward Logistics is a mid-size freight and supply chain company. Their ops team is drowning in spreadsheets. THis dashboard is for the VP of Operations to see how the business is running: shipment volume, on-time delivery rates, regional performance, and open exceptions.
 
 ## Recommended IDE Setup
 

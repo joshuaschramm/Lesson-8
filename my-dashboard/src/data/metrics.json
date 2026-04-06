@@ -2,97 +2,97 @@
   {
     "month": "Jan",
     "year": 2025,
-    "revenue": 42350,
-    "visitors": 12480,
-    "conversions": 2.8,
-    "orders": 349
+    "shipmentVolume": 4230,
+    "onTimeDeliveryRate": 91.2,
+    "regionalPerformance": 87.5,
+    "openExceptions": 148
   },
   {
     "month": "Feb",
     "year": 2025,
-    "revenue": 43910,
-    "visitors": 11920,
-    "conversions": 3.1,
-    "orders": 370
+    "shipmentVolume": 4085,
+    "onTimeDeliveryRate": 90.8,
+    "regionalPerformance": 86.9,
+    "openExceptions": 162
   },
   {
     "month": "Mar",
     "year": 2025,
-    "revenue": 47680,
-    "visitors": 14230,
-    "conversions": 2.9,
-    "orders": 413
+    "shipmentVolume": 4710,
+    "onTimeDeliveryRate": 92.1,
+    "regionalPerformance": 88.4,
+    "openExceptions": 134
   },
   {
     "month": "Apr",
     "year": 2025,
-    "revenue": 51240,
-    "visitors": 16890,
-    "conversions": 3.4,
-    "orders": 574
+    "shipmentVolume": 5120,
+    "onTimeDeliveryRate": 93.5,
+    "regionalPerformance": 89.7,
+    "openExceptions": 119
   },
   {
     "month": "May",
     "year": 2025,
-    "revenue": 54870,
-    "visitors": 19540,
-    "conversions": 3.2,
-    "orders": 625
+    "shipmentVolume": 5480,
+    "onTimeDeliveryRate": 92.8,
+    "regionalPerformance": 90.1,
+    "openExceptions": 127
   },
   {
     "month": "Jun",
     "year": 2025,
-    "revenue": 61320,
-    "visitors": 22710,
-    "conversions": 3.7,
-    "orders": 840
+    "shipmentVolume": 5890,
+    "onTimeDeliveryRate": 94.2,
+    "regionalPerformance": 91.3,
+    "openExceptions": 98
   },
   {
     "month": "Jul",
     "year": 2025,
-    "revenue": 67450,
-    "visitors": 24130,
-    "conversions": 3.5,
-    "orders": 845
+    "shipmentVolume": 6150,
+    "onTimeDeliveryRate": 93.7,
+    "regionalPerformance": 90.8,
+    "openExceptions": 112
   },
   {
     "month": "Aug",
     "year": 2025,
-    "revenue": 63890,
-    "visitors": 23080,
-    "conversions": 3.3,
-    "orders": 762
+    "shipmentVolume": 5970,
+    "onTimeDeliveryRate": 91.9,
+    "regionalPerformance": 89.2,
+    "openExceptions": 143
   },
   {
     "month": "Sep",
     "year": 2025,
-    "revenue": 58710,
-    "visitors": 18640,
-    "conversions": 2.9,
-    "orders": 541
+    "shipmentVolume": 5640,
+    "onTimeDeliveryRate": 93.1,
+    "regionalPerformance": 90.5,
+    "openExceptions": 108
   },
   {
     "month": "Oct",
     "year": 2025,
-    "revenue": 55430,
-    "visitors": 16270,
-    "conversions": 3.1,
-    "orders": 504
+    "shipmentVolume": 6320,
+    "onTimeDeliveryRate": 94.6,
+    "regionalPerformance": 92.1,
+    "openExceptions": 87
   },
   {
     "month": "Nov",
     "year": 2025,
-    "revenue": 71680,
-    "visitors": 20950,
-    "conversions": 4.6,
-    "orders": 964
+    "shipmentVolume": 7180,
+    "onTimeDeliveryRate": 92.3,
+    "regionalPerformance": 88.6,
+    "openExceptions": 176
   },
   {
     "month": "Dec",
     "year": 2025,
-    "revenue": 78240,
-    "visitors": 19870,
-    "conversions": 4.9,
-    "orders": 974
+    "shipmentVolume": 7540,
+    "onTimeDeliveryRate": 90.1,
+    "regionalPerformance": 86.4,
+    "openExceptions": 203
   }
 ]

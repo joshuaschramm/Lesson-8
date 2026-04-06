@@ -1,15 +1,15 @@
 # My Dashboard – Project Brief
 
 ## What is this? 
- I want a single page analytics dashboard showing monthly business metrics like a Shopify Admin or Google Analytics view.
+ I want a single page analytics dashboard for FastForward Logistics, a mid-size freight and supply chain company. The VP of Operations wants a single internal dashboard she can pull up in leadership meetings to see how the business is running: shipment volume, on-time delivery rates, regional performance, and open exceptions.
 
 ## Data
 Generate a fake dataset as a JSON file (src/data/metrics.json).
 12 months of Data (Jan-Dec 2025), each month containing
-- revenue (Dollar amount, trending upward with some variation)
-- visitors (number, seasonal pattern - higher in summer)
-- conversions (percentage, fluctuates between 2-5%)
-- orders (number, correlates loosely with visitors)
+- shipment volume
+- on-time delivery rates 
+- regional performance
+- open exceptions
 
 ## Layout (Vuetify)
 - v-app-bar at the top with the dashboard tittle and a month picker

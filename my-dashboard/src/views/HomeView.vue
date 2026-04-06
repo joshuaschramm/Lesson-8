@@ -31,10 +31,10 @@ ChartJS.register(
 interface MonthData {
   month: string
   year: number
-  revenue: number
-  visitors: number
-  conversions: number
-  orders: number
+  shipmentVolume: number
+  onTimeDeliveryRate: number
+  regionalPerformance: number
+  openExceptions: number
 }
 
 const data: MonthData[] = metricsData as MonthData[]
@@ -55,36 +55,37 @@ const filteredData = computed(() =>
 )
 
 // --- Summary card values ---
-const summaryRevenue = computed(() =>
+const summaryShipments = computed(() =>
   selectedMonth.value === 'All'
-    ? data.reduce((sum, d) => sum + d.revenue, 0)
-    : filteredData.value[0]?.revenue ?? 0
+    ? data.reduce((sum, d) => sum + d.shipmentVolume, 0)
+    : filteredData.value[0]?.shipmentVolume ?? 0
 )
 
-const summaryVisitors = computed(() =>
-  selectedMonth.value === 'All'
-    ? data.reduce((sum, d) => sum + d.visitors, 0)
-    : filteredData.value[0]?.visitors ?? 0
-)
-
-const summaryConversions = computed(() => {
+const summaryOnTime = computed(() => {
   if (selectedMonth.value === 'All') {
-    const avg = data.reduce((sum, d) => sum + d.conversions, 0) / data.length
+    const avg = data.reduce((sum, d) => sum + d.onTimeDeliveryRate, 0) / data.length
     return +avg.toFixed(1)
   }
-  return filteredData.value[0]?.conversions ?? 0
+  return filteredData.value[0]?.onTimeDeliveryRate ?? 0
 })
 
-const summaryOrders = computed(() =>
+const summaryRegional = computed(() => {
+  if (selectedMonth.value === 'All') {
+    const avg = data.reduce((sum, d) => sum + d.regionalPerformance, 0) / data.length
+    return +avg.toFixed(1)
+  }
+  return filteredData.value[0]?.regionalPerformance ?? 0
+})
+
+const summaryExceptions = computed(() =>
   selectedMonth.value === 'All'
-    ? data.reduce((sum, d) => sum + d.orders, 0)
-    : filteredData.value[0]?.orders ?? 0
+    ? data.reduce((sum, d) => sum + d.openExceptions, 0)
+    : filteredData.value[0]?.openExceptions ?? 0
 )
 
 // --- Change indicators (vs previous month) ---
 function changeInfo(field: keyof MonthData) {
   if (selectedMonth.value === 'All') {
-    // Compare Dec vs Jan for full-year trend
     const first = data[0]![field] as number
     const last = data[data.length - 1]![field] as number
     const pct = first === 0 ? 0 : (((last - first) / first) * 100)
@@ -98,10 +99,10 @@ function changeInfo(field: keyof MonthData) {
   return { direction: pct >= 0 ? 'up' : 'down', pct: Math.abs(+pct.toFixed(1)) }
 }
 
-const revenueChange = computed(() => changeInfo('revenue'))
-const visitorsChange = computed(() => changeInfo('visitors'))
-const conversionsChange = computed(() => changeInfo('conversions'))
-const ordersChange = computed(() => changeInfo('orders'))
+const shipmentsChange = computed(() => changeInfo('shipmentVolume'))
+const onTimeChange = computed(() => changeInfo('onTimeDeliveryRate'))
+const regionalChange = computed(() => changeInfo('regionalPerformance'))
+const exceptionsChange = computed(() => changeInfo('openExceptions'))
 
 // --- Color palette ---
 const COLORS = {
@@ -109,8 +110,8 @@ const COLORS = {
   tealLight: 'rgba(38,166,154,0.25)',
   blue: '#42A5F5',
   blueLight: 'rgba(66,165,245,0.25)',
-  purple: '#AB47BC',
-  purpleLight: 'rgba(171,71,188,0.25)',
+  amber: '#FFA726',
+  amberLight: 'rgba(255,167,38,0.25)',
   grid: 'rgba(255,255,255,0.06)',
   tickText: 'rgba(255,255,255,0.5)',
 }
@@ -118,12 +119,12 @@ const COLORS = {
 // --- Charts ---
 const chartLabels = computed(() => filteredData.value.map((d) => d.month))
 
-const revenueChartData = computed(() => ({
+const shipmentChartData = computed(() => ({
   labels: chartLabels.value,
   datasets: [
     {
-      label: 'Revenue ($)',
-      data: filteredData.value.map((d) => d.revenue),
+      label: 'Shipment Volume',
+      data: filteredData.value.map((d) => d.shipmentVolume),
       backgroundColor: COLORS.teal,
       borderRadius: 4,
       maxBarThickness: 48,
@@ -131,12 +132,12 @@ const revenueChartData = computed(() => ({
   ],
 }))
 
-const visitorsChartData = computed(() => ({
+const onTimeChartData = computed(() => ({
   labels: chartLabels.value,
   datasets: [
     {
-      label: 'Visitors',
-      data: filteredData.value.map((d) => d.visitors),
+      label: 'On-Time Delivery %',
+      data: filteredData.value.map((d) => d.onTimeDeliveryRate),
       borderColor: COLORS.blue,
       backgroundColor: COLORS.blueLight,
       pointBackgroundColor: COLORS.blue,
@@ -147,15 +148,15 @@ const visitorsChartData = computed(() => ({
   ],
 }))
 
-const conversionsChartData = computed(() => ({
+const exceptionsChartData = computed(() => ({
   labels: chartLabels.value,
   datasets: [
     {
-      label: 'Conversion Rate (%)',
-      data: filteredData.value.map((d) => d.conversions),
-      borderColor: COLORS.purple,
-      backgroundColor: COLORS.purpleLight,
-      pointBackgroundColor: COLORS.purple,
+      label: 'Open Exceptions',
+      data: filteredData.value.map((d) => d.openExceptions),
+      borderColor: COLORS.amber,
+      backgroundColor: COLORS.amberLight,
+      pointBackgroundColor: COLORS.amber,
       tension: 0.35,
       fill: true,
       pointRadius: 4,
@@ -180,7 +181,7 @@ const barOptions = computed(() => ({
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    title: { display: true, text: 'Monthly Revenue', color: '#fff', font: { size: 14 } },
+    title: { display: true, text: 'Monthly Shipment Volume', color: '#fff', font: { size: 14 } },
   },
   scales: {
     ...baseScales,
@@ -188,7 +189,7 @@ const barOptions = computed(() => ({
       ...baseScales.y,
       ticks: {
         ...baseScales.y.ticks,
-        callback: (v: number | string) => '$' + Number(v).toLocaleString(),
+        callback: (v: number | string) => Number(v).toLocaleString(),
       },
     },
   },
@@ -199,22 +200,14 @@ const lineOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    title: { display: true, text: 'Visitors Over Time', color: '#fff', font: { size: 14 } },
-  },
-  scales: baseScales,
-}
-
-const areaOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    title: { display: true, text: 'Conversion Rate Trend', color: '#fff', font: { size: 14 } },
+    title: { display: true, text: 'On-Time Delivery Rate', color: '#fff', font: { size: 14 } },
   },
   scales: {
     ...baseScales,
     y: {
       ...baseScales.y,
+      min: 85,
+      max: 100,
       ticks: {
         ...baseScales.y.ticks,
         callback: (v: number | string) => v + '%',
@@ -223,10 +216,17 @@ const areaOptions = {
   },
 }
 
-// --- Helpers ---
-function formatCurrency(n: number) {
-  return '$' + n.toLocaleString()
+const areaOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    title: { display: true, text: 'Open Exceptions Trend', color: '#fff', font: { size: 14 } },
+  },
+  scales: baseScales,
 }
+
+// --- Helpers ---
 function formatNumber(n: number) {
   return n.toLocaleString()
 }
@@ -236,8 +236,8 @@ function formatNumber(n: number) {
   <!-- App Bar -->
   <v-app-bar flat color="surface" :elevation="0" class="border-b px-6">
     <v-app-bar-title class="text-h6 font-weight-bold">
-      <v-icon class="mr-2" size="small">mdi-view-dashboard</v-icon>
-      My Dashboard
+      <v-icon class="mr-2" size="small">mdi-truck-fast</v-icon>
+      FastForward Logistics
     </v-app-bar-title>
     <template #append>
       <div style="width: 200px" class="mr-2">
@@ -257,85 +257,85 @@ function formatNumber(n: number) {
     <v-container fluid class="dashboard-container">
       <!-- Summary Cards -->
       <div class="card-grid">
-        <!-- Revenue -->
+        <!-- Shipment Volume -->
         <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Revenue</div>
-          <div class="text-h5 font-weight-bold">{{ formatCurrency(summaryRevenue) }}</div>
+          <div class="text-caption text-medium-emphasis mb-2">Shipment Volume</div>
+          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryShipments) }}</div>
           <div
             class="text-caption mt-2"
-            :class="revenueChange.direction === 'up' ? 'text-success' : 'text-error'"
+            :class="shipmentsChange.direction === 'up' ? 'text-success' : 'text-error'"
           >
             <v-icon size="x-small">
-              {{ revenueChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              {{ shipmentsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
             </v-icon>
-            {{ revenueChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            {{ shipmentsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
           </div>
         </v-card>
 
-        <!-- Visitors -->
+        <!-- On-Time Delivery Rate -->
         <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Visitors</div>
-          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryVisitors) }}</div>
+          <div class="text-caption text-medium-emphasis mb-2">On-Time Delivery</div>
+          <div class="text-h5 font-weight-bold">{{ summaryOnTime }}%</div>
           <div
             class="text-caption mt-2"
-            :class="visitorsChange.direction === 'up' ? 'text-success' : 'text-error'"
+            :class="onTimeChange.direction === 'up' ? 'text-success' : 'text-error'"
           >
             <v-icon size="x-small">
-              {{ visitorsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              {{ onTimeChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
             </v-icon>
-            {{ visitorsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            {{ onTimeChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
           </div>
         </v-card>
 
-        <!-- Conversions -->
+        <!-- Regional Performance -->
         <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Conversions</div>
-          <div class="text-h5 font-weight-bold">{{ summaryConversions }}%</div>
+          <div class="text-caption text-medium-emphasis mb-2">Regional Performance</div>
+          <div class="text-h5 font-weight-bold">{{ summaryRegional }}%</div>
           <div
             class="text-caption mt-2"
-            :class="conversionsChange.direction === 'up' ? 'text-success' : 'text-error'"
+            :class="regionalChange.direction === 'up' ? 'text-success' : 'text-error'"
           >
             <v-icon size="x-small">
-              {{ conversionsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              {{ regionalChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
             </v-icon>
-            {{ conversionsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            {{ regionalChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
           </div>
         </v-card>
 
-        <!-- Orders -->
+        <!-- Open Exceptions (lower is better) -->
         <v-card variant="tonal" class="pa-10" rounded="lg">
-          <div class="text-caption text-medium-emphasis mb-2">Orders</div>
-          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryOrders) }}</div>
+          <div class="text-caption text-medium-emphasis mb-2">Open Exceptions</div>
+          <div class="text-h5 font-weight-bold">{{ formatNumber(summaryExceptions) }}</div>
           <div
             class="text-caption mt-2"
-            :class="ordersChange.direction === 'up' ? 'text-success' : 'text-error'"
+            :class="exceptionsChange.direction === 'down' ? 'text-success' : 'text-error'"
           >
             <v-icon size="x-small">
-              {{ ordersChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
+              {{ exceptionsChange.direction === 'up' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
             </v-icon>
-            {{ ordersChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
+            {{ exceptionsChange.pct }}% {{ selectedMonth === 'All' ? 'YTD' : 'vs prev' }}
           </div>
         </v-card>
       </div>
 
-      <!-- Charts Row: Revenue Bar + Visitors Line -->
+      <!-- Charts Row: Shipment Volume Bar + On-Time Delivery Line -->
       <div class="chart-grid-2 chart-row-flex">
         <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
           <div class="chart-inner">
-            <Bar :data="revenueChartData" :options="barOptions as any" />
+            <Bar :data="shipmentChartData" :options="barOptions as any" />
           </div>
         </v-card>
         <v-card variant="tonal" rounded="lg" class="pa-10 chart-card">
           <div class="chart-inner">
-            <Line :data="visitorsChartData" :options="lineOptions as any" />
+            <Line :data="onTimeChartData" :options="lineOptions as any" />
           </div>
         </v-card>
       </div>
 
-      <!-- Full-width Conversions Area Chart -->
+      <!-- Full-width Open Exceptions Area Chart -->
       <v-card variant="tonal" rounded="lg" class="pa-10 chart-card conversions-card">
         <div class="chart-inner">
-          <Line :data="conversionsChartData" :options="areaOptions as any" />
+          <Line :data="exceptionsChartData" :options="areaOptions as any" />
         </div>
       </v-card>
     </v-container>

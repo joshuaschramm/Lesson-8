@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384.5 95.94">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: 0em;
+      }
+
+      .cls-2 {
+        fill: #06e8b5;
+        font-family: SegoeUI-Bold, 'Segoe UI';
+        font-size: 45.72px;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        font-family: SegoeUI-Semilight, 'Segoe UI';
+        font-size: 33.68px;
+        font-weight: 300;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #fff;
+      }
+
+      .cls-5 {
+        fill: #06e7b5;
+      }
+
+      .cls-6 {
+        letter-spacing: 0em;
+      }
+
+      .cls-7 {
+        letter-spacing: -.03em;
+      }
+
+      .cls-8 {
+        letter-spacing: 0em;
+      }
+
+      .cls-9 {
+        letter-spacing: .03em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <polygon class="cls-4" points="23.92 80.09 5.92 95.94 5.92 57.72 23.92 57.72 23.92 80.09"/>
+    <path class="cls-4" d="M5.97,30.75c-.15-1.29-1.19-12.86,6.74-21.73C16.39,4.9,23.36,0,35.66,0h72.49l-20.05,18h-52.44c-4.49,0-7.67.99-9.47,2.95-2.67,2.91-2.33,6.42-2.32,6.47v3.33H5.97Z"/>
+    <g>
+      <rect class="cls-5" y="34.73" width="75.75" height="18"/>
+      <polygon class="cls-5" points="69.45 65.27 106.75 43.73 69.45 22.19 69.45 65.27"/>
+    </g>
+    <text class="cls-2" transform="translate(120.69 41.3)"><tspan class="cls-7" x="0" y="0">F</tspan><tspan x="22.42" y="0">astFo</tspan><tspan class="cls-9" x="136.66" y="0">r</tspan><tspan class="cls-1" x="156.42" y="0">wa</tspan><tspan class="cls-8" x="217.48" y="0">r</tspan><tspan class="cls-6" x="235.5" y="0">d</tspan></text>
+    <text class="cls-3" transform="translate(120.92 76.83)"><tspan x="0" y="0">Logistics</tspan></text>
+  </g>
+</svg>
