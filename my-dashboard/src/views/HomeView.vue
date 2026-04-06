@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Bar, Line } from 'vue-chartjs'
+import logoUrl from '@/assets/ff-logistics-logo.svg'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -104,15 +105,15 @@ const onTimeChange = computed(() => changeInfo('onTimeDeliveryRate'))
 const regionalChange = computed(() => changeInfo('regionalPerformance'))
 const exceptionsChange = computed(() => changeInfo('openExceptions'))
 
-// --- Color palette ---
+// --- Color palette (brand #06e8b5 tints & shades) ---
 const COLORS = {
-  teal: '#26A69A',
-  tealLight: 'rgba(38,166,154,0.25)',
-  blue: '#42A5F5',
-  blueLight: 'rgba(66,165,245,0.25)',
-  amber: '#FFA726',
-  amberLight: 'rgba(255,167,38,0.25)',
-  grid: 'rgba(255,255,255,0.06)',
+  brand: '#06e8b5',
+  brandLight: 'rgba(6,232,181,0.25)',
+  brandMid: '#04b38b',
+  brandMidLight: 'rgba(4,179,139,0.25)',
+  brandDark: '#038f6f',
+  brandDarkLight: 'rgba(3,143,111,0.25)',
+  grid: 'rgba(6,232,181,0.08)',
   tickText: 'rgba(255,255,255,0.5)',
 }
 
@@ -125,7 +126,7 @@ const shipmentChartData = computed(() => ({
     {
       label: 'Shipment Volume',
       data: filteredData.value.map((d) => d.shipmentVolume),
-      backgroundColor: COLORS.teal,
+      backgroundColor: COLORS.brand,
       borderRadius: 4,
       maxBarThickness: 48,
     },
@@ -138,9 +139,9 @@ const onTimeChartData = computed(() => ({
     {
       label: 'On-Time Delivery %',
       data: filteredData.value.map((d) => d.onTimeDeliveryRate),
-      borderColor: COLORS.blue,
-      backgroundColor: COLORS.blueLight,
-      pointBackgroundColor: COLORS.blue,
+      borderColor: COLORS.brandMid,
+      backgroundColor: COLORS.brandMidLight,
+      pointBackgroundColor: COLORS.brandMid,
       tension: 0.35,
       fill: false,
       pointRadius: 4,
@@ -154,9 +155,9 @@ const exceptionsChartData = computed(() => ({
     {
       label: 'Open Exceptions',
       data: filteredData.value.map((d) => d.openExceptions),
-      borderColor: COLORS.amber,
-      backgroundColor: COLORS.amberLight,
-      pointBackgroundColor: COLORS.amber,
+      borderColor: COLORS.brandDark,
+      backgroundColor: COLORS.brandDarkLight,
+      pointBackgroundColor: COLORS.brandDark,
       tension: 0.35,
       fill: true,
       pointRadius: 4,
@@ -235,9 +236,8 @@ function formatNumber(n: number) {
 <template>
   <!-- App Bar -->
   <v-app-bar flat color="surface" :elevation="0" class="border-b px-6">
-    <v-app-bar-title class="text-h6 font-weight-bold">
-      <v-icon class="mr-2" size="small">mdi-truck-fast</v-icon>
-      FastForward Logistics
+    <v-app-bar-title>
+      <img :src="logoUrl" alt="FastForward Logistics" style="height: 36px; vertical-align: middle" />
     </v-app-bar-title>
     <template #append>
       <div style="width: 200px" class="mr-2">

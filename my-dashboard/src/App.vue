@@ -16,14 +16,7 @@ html, body {
   padding-top: 64px !important;
 }
 .v-application {
-  background: linear-gradient(
-    135deg,
-    #0a0a0f 0%,
-    #1a0a2e 25%,
-    #0d1b2a 50%,
-    #2a0a3e 75%,
-    #0a0a1a 100%
-  ) !important;
+  background: #081c3b !important;
 }
 </style>
 
